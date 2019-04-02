@@ -634,13 +634,25 @@ static NSNumberInitWithUnsignedLongLongImp _jk_NSNumberInitWithUnsignedLongLongI
 
 extern void jk_collectionClassLoadTimeInitialization(void) __attribute__ ((constructor));
 
+@interface JKArray : NSMutableArray <NSCopying, NSMutableCopying, NSFastEnumeration> {
+    id         *objects;
+    NSUInteger  count, capacity, mutations;
+}
+@end
+
+@interface JKDictionary : NSMutableDictionary <NSCopying, NSMutableCopying, NSFastEnumeration> {
+    NSUInteger count, capacity, mutations;
+    JKHashTableEntry *entry;
+}
+@end
+
 void jk_collectionClassLoadTimeInitialization(void) {
   NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init]; // Though technically not required, the run time environment at load time initialization may be less than ideal.
   
-  _JKArrayClass             = objc_getClass("JKArray");
+  _JKArrayClass             = [JKArray class];//objc_getClass("JKArray");
   _JKArrayInstanceSize      = jk_max(16UL, class_getInstanceSize(_JKArrayClass));
   
-  _JKDictionaryClass        = objc_getClass("JKDictionary");
+  _JKDictionaryClass        = [JKDictionary class];//objc_getClass("JKDictionary");
   _JKDictionaryInstanceSize = jk_max(16UL, class_getInstanceSize(_JKDictionaryClass));
   
   // For JSONDecoder...
@@ -658,11 +670,6 @@ void jk_collectionClassLoadTimeInitialization(void) {
 
 
 #pragma mark -
-@interface JKArray : NSMutableArray <NSCopying, NSMutableCopying, NSFastEnumeration> {
-  id         *objects;
-  NSUInteger  count, capacity, mutations;
-}
-@end
 
 @implementation JKArray
 
@@ -677,7 +684,7 @@ static JKArray *_JKArrayCreate(id *objects, NSUInteger count, BOOL mutableCollec
   NSCParameterAssert((objects != NULL) && (_JKArrayClass != NULL) && (_JKArrayInstanceSize > 0UL));
   JKArray *array = NULL;
   if(JK_EXPECT_T((array = (JKArray *)calloc(1UL, _JKArrayInstanceSize)) != NULL)) { // Directly allocate the JKArray instance via calloc.
-    array->isa      = _JKArrayClass;
+      object_setClass(array, _JKArrayClass);
     if((array = [array init]) == NULL) { return(NULL); }
     array->capacity = count;
     array->count    = count;
@@ -873,11 +880,6 @@ static void _JKArrayRemoveObjectAtIndex(JKArray *array, NSUInteger objectIndex) 
 @end
 
 #pragma mark -
-@interface JKDictionary : NSMutableDictionary <NSCopying, NSMutableCopying, NSFastEnumeration> {
-  NSUInteger count, capacity, mutations;
-  JKHashTableEntry *entry;
-}
-@end
 
 @implementation JKDictionary
 
@@ -928,7 +930,7 @@ static JKDictionary *_JKDictionaryCreate(id *keys, NSUInteger *keyHashes, id *ob
   NSCParameterAssert((keys != NULL) && (keyHashes != NULL) && (objects != NULL) && (_JKDictionaryClass != NULL) && (_JKDictionaryInstanceSize > 0UL));
   JKDictionary *dictionary = NULL;
   if(JK_EXPECT_T((dictionary = (JKDictionary *)calloc(1UL, _JKDictionaryInstanceSize)) != NULL)) { // Directly allocate the JKDictionary instance via calloc.
-    dictionary->isa      = _JKDictionaryClass;
+      object_setClass(dictionary, _JKDictionaryClass);
     if((dictionary = [dictionary init]) == NULL) { return(NULL); }
     dictionary->capacity = _JKDictionaryCapacityForCount(count);
     dictionary->count    = 0UL;

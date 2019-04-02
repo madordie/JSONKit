@@ -143,9 +143,9 @@ typedef struct JKParseState JKParseState; // Opaque internal, private type.
 @interface JSONDecoder : NSObject {
   JKParseState *parseState;
 }
-+ (id)decoder;
-+ (id)decoderWithParseOptions:(JKParseOptionFlags)parseOptionFlags;
-- (id)initWithParseOptions:(JKParseOptionFlags)parseOptionFlags;
++ (JSONDecoder*)decoder;
++ (JSONDecoder*)decoderWithParseOptions:(JKParseOptionFlags)parseOptionFlags;
+- (JSONDecoder*)initWithParseOptions:(JKParseOptionFlags)parseOptionFlags;
 - (void)clearCache;
 
 // The parse... methods were deprecated in v1.4 in favor of the v1.4 objectWith... methods.
